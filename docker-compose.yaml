@@ -1,0 +1,39 @@
+services:
+  api.evd:
+    image: ghcr.io/sistema-evaluacion-docente/api.evd:latest
+    ports:
+      - "${PORT_0}:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=${DATABASE_URL}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - FIREBASE_TYPE=${FIREBASE_TYPE}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_PRIVATE_KEY_ID=${FIREBASE_PRIVATE_KEY_ID}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_CLIENT_ID=${FIREBASE_CLIENT_ID}
+      - FIREBASE_AUTH_URI=${FIREBASE_AUTH_URI}
+      - FIREBASE_TOKEN_URI=${FIREBASE_TOKEN_URI}
+      - FIREBASE_AUTH_PROVIDER_X509_CERT_URL=${FIREBASE_AUTH_PROVIDER_X509_CERT_URL}
+      - FIREBASE_CLIENT_X509_CERT_URL=${FIREBASE_CLIENT_X509_CERT_URL}
+      - FIREBASE_UNIVERSE_DOMAIN=${FIREBASE_UNIVERSE_DOMAIN}
+      - SEED_ADMIN_INSTITUTIONAL_CODE=${SEED_ADMIN_INSTITUTIONAL_CODE}
+      - SEED_ADMIN_UID=${SEED_ADMIN_UID}
+      - SEED_ADMIN_EMAIL=${SEED_ADMIN_EMAIL}
+      - DEBUG=${DEBUG}
+      - HUGGINGFACE_RISK_MODEL=${HUGGINGFACE_RISK_MODEL}
+      - HUGGINGFACE_CATEGORY_MODEL=${HUGGINGFACE_CATEGORY_MODEL}
+      - HF_HOME=/app/hf_cache
+    volumes:
+      - hf_cache:/app/hf_cache
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1g
+  app.evd:
+    image: ghcr.io/sistema-evaluacion-docente/app.evd:latest
+    ports:
+      - "${PORT_0}:80"
+
