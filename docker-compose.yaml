@@ -32,6 +32,8 @@ services:
         limits:
           cpus: '0.3'
           memory: 800M
+    networks:
+      - evd-network
   app.evd:
     image: ghcr.io/sistema-evaluacion-docente/app.evd:latest
     ports:
@@ -44,6 +46,13 @@ services:
       - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
       - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
       - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+    networks:
+      - evd-network
+    depends_on:
+      - api.evd
 
 volumes:
   hf_cache:
+
+networks:
+  evd-network:
