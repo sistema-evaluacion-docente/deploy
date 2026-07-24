@@ -6,12 +6,13 @@
 
 ## Descripción
 
-Este repositorio contiene la configuración de Docker Compose para desplegar el **Sistema de Evaluación Docente** en el servidor de la UFPS. El sistema consta de dos servicios:
+Este repositorio contiene la configuración de Docker Compose para desplegar el **Sistema de Evaluación Docente** en el servidor de la UFPS. El sistema consta de tres servicios:
 
-| Servicio  | Imagen                                       | Descripción                     |
-| --------- | -------------------------------------------- | ------------------------------- |
-| `api.evd` | `ghcr.io/sistema-evaluacion-docente/api.evd` | API REST (FastAPI + PostgreSQL) |
-| `app.evd` | `ghcr.io/sistema-evaluacion-docente/app.evd` | Frontend web (React + nginx)    |
+| Servicio  | Imagen                                       | Descripción                                      |
+| --------- | -------------------------------------------- | ------------------------------------------------ |
+| `nginx`   | `nginx:alpine`                               | Reverse proxy que expone el sistema al exterior  |
+| `api.evd` | `ghcr.io/sistema-evaluacion-docente/api.evd` | API REST (FastAPI + PostgreSQL)                  |
+| `app.evd` | `ghcr.io/sistema-evaluacion-docente/app.evd` | Frontend web (React)                             |
 
 ---
 
@@ -35,6 +36,9 @@ cd deploy
 Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 
 ```env
+# Puerto del reverse proxy nginx
+PORT_1=80
+
 # Base de datos
 DATABASE_URL=postgresql://usuario:password@host:5432/dbname
 
@@ -65,6 +69,14 @@ DEBUG=false
 # Modelos de HuggingFace
 HUGGINGFACE_RISK_MODEL=
 HUGGINGFACE_CATEGORY_MODEL=
+
+# Firebase Client SDK (Frontend)
+VITE_FIREBASE_API_KEY=tu-api-key
+VITE_FIREBASE_AUTH_DOMAIN=tu-proyecto.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=tu-proyecto
+VITE_FIREBASE_STORAGE_BUCKET=tu-proyecto.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abcdef
 ```
 
 > **Importante:** Nunca versiones el archivo `.env`. Asegúrate de que esté en `.gitignore`.
@@ -85,7 +97,7 @@ o
 podman-compose up -d
 ```
 
-Este comando descarga las imágenes de los contenedores desde GitHub Container Registry (GHCR) y levanta los servicios en segundo plano.
+Este comando descarga las imágenes de los contenedores desde GitHub Container Registry (GHCR) y levanta los servicios en segundo plano. Nginx actúa como reverse proxy, exponiendo el sistema en el puerto configurado en `PORT_1`.
 
 ### Verificar estado
 
@@ -105,6 +117,9 @@ podman-compose ps
 # Todos los servicios
 docker compose logs -f
 
+# Solo nginx
+docker compose logs -f nginx
+
 # Solo la API
 docker compose logs -f api.evd
 
@@ -117,6 +132,9 @@ o
 ```bash
 # Todos los servicios
 podman-compose logs -f
+
+# Solo nginx
+podman-compose logs -f nginx
 
 # Solo la API
 podman-compose logs -f api.evd
@@ -177,7 +195,7 @@ o
 podman-compose down -v
 ```
 
-> **Precaución:** Esto eliminará el caché de modelos de HuggingFace almacenado. La API tardará más en la primera ejecución al volver a descargar los modelos.
+> **Precaución:** Esto eliminará el caché de modelos de HuggingFace almacenado en el volumen `hf_cache`. La API tardará más en la primera ejecución al volver a descargar los modelos.
 
 ---
 
@@ -194,12 +212,26 @@ Estos valores están ajustados para el servidor de la UFPS. Si es necesario modi
 
 ---
 
+## Arquitectura de red
+
+El sistema utiliza un reverse proxy **nginx** que recibe todas las peticiones entrantes y las distribuye internamente:
+
+| Ruta         | Servicio destino | Descripción                  |
+| ------------ | ---------------- | ---------------------------- |
+| `/api/*`     | `api.evd:8000`   | API REST (FastAPI)           |
+| `/*`         | `app.evd:80`     | Frontend web (React)         |
+
+El frontend se configura con `VITE_API_URL=/api` para que las llamadas a la API pasen a través del mismo dominio, evitando problemas de CORS en producción.
+
+---
+
 ## Troubleshooting
 
 ### Los contenedores no inician
 
 ```bash
 # Verificar logs para identificar el error
+docker compose logs nginx
 docker compose logs api.evd
 docker compose logs app.evd
 ```
@@ -208,9 +240,14 @@ o
 
 ```bash
 # Verificar logs para identificar el error
+podman-compose logs nginx
 podman-compose logs api.evd
 podman-compose logs app.evd
 ```
+
+### nginx no puede conectar a los servicios
+
+Verifica que `api.evd` y `app.evd` estén en ejecución. Si modificaste el archivo `nginx.conf`, asegúrate de que los nombres de los servicios coincidan con los definidos en `docker-compose.yaml`.
 
 ### La API no conecta a la base de datos
 
@@ -227,6 +264,7 @@ Asegúrate de que todas las variables `FIREBASE_*` estén correctamente configur
 ### Reiniciar un servicio específico
 
 ```bash
+docker compose restart nginx
 docker compose restart api.evd
 docker compose restart app.evd
 ```
@@ -234,6 +272,7 @@ docker compose restart app.evd
 o
 
 ```bash
+podman-compose restart nginx
 podman-compose restart api.evd
 podman-compose restart app.evd
 ```
