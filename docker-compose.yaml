@@ -30,10 +30,12 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 1g
+          cpus: '0.3'
+          memory: 800M
   app.evd:
     image: ghcr.io/sistema-evaluacion-docente/app.evd:latest
     ports:
-      - "${PORT_0}:80"
+      - "${PORT_1}:80"
 
+volumes:
+  hf_cache:
