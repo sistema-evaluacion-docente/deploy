@@ -11,15 +11,23 @@ services:
       - api.evd
       - app.evd
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - evd-network
+
   api.evd:
     image: ghcr.io/sistema-evaluacion-docente/api.evd:latest
     expose:
       - "8000"
-    # ports:
-      # - "${PORT_0}:8000"
     environment:
       - PORT=8000
       - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - FIREBASE_TYPE=${FIREBASE_TYPE}
       - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
@@ -52,8 +60,6 @@ services:
     image: ghcr.io/sistema-evaluacion-docente/app.evd:latest
     expose:
       - "80"
-    # ports:
-    #   - "${PORT_1}:80"
     environment:
       - VITE_API_URL=/api
       - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
@@ -66,9 +72,11 @@ services:
       - evd-network
     depends_on:
       - api.evd
+      - redis
 
 volumes:
   hf_cache:
+  redis_data:
 
 networks:
   evd-network:
