@@ -11,14 +11,14 @@ services:
       - api.evd
       - app.evd
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - evd-network
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - evd-network
 
   api.evd:
     image: ghcr.io/sistema-evaluacion-docente/api.evd:latest
@@ -72,11 +72,11 @@ services:
       - evd-network
     depends_on:
       - api.evd
-      - redis
+      # - redis
 
 volumes:
   hf_cache:
-  redis_data:
+  # redis_data:
 
 networks:
   evd-network:
