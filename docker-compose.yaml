@@ -68,6 +68,7 @@ services:
       - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
       - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
       - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+      - VITE_NODE_ENV=production
     networks:
       - evd-network
     depends_on:
