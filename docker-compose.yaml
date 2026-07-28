@@ -49,6 +49,7 @@ services:
       - HF_HOME=/app/hf_cache
     volumes:
       - hf_cache:/app/hf_cache
+      - uploads_data:/uploads
     deploy:
       resources:
         limits:
@@ -77,6 +78,7 @@ services:
 
 volumes:
   hf_cache:
+  uploads_data:
   # redis_data:
 
 networks:
