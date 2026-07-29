@@ -42,6 +42,9 @@ PORT_1=80
 # Base de datos
 DATABASE_URL=postgresql://usuario:password@host:5432/dbname
 
+# Redis
+REDIS_URL=redis://host:6379/0
+
 # Origenes permitidos (CORS)
 ALLOWED_ORIGINS=https://tudominio.com
 
@@ -195,7 +198,7 @@ o
 podman-compose down -v
 ```
 
-> **Precaución:** Esto eliminará el caché de modelos de HuggingFace almacenado en el volumen `hf_cache`. La API tardará más en la primera ejecución al volver a descargar los modelos.
+> **Precaución:** Esto eliminará el caché de modelos de HuggingFace almacenado en el volumen `hf_cache` y los archivos de subida almacenados en `uploads_data`. La API tardará más en la primera ejecución al volver a descargar los modelos.
 
 ---
 
@@ -203,12 +206,21 @@ podman-compose down -v
 
 El servicio `api.evd` tiene los siguientes límites de recursos configurados:
 
-| Recurso | Límite    |
-| ------- | --------- |
-| CPU     | 0.3 cores |
-| Memoria | 800 MB    |
+| Recurso | Límite   |
+| ------- | -------- |
+| CPU     | 0.5 cores |
+| Memoria | 1 GB     |
 
 Estos valores están ajustados para el servidor de la UFPS. Si es necesario modificarlos, edita la sección `deploy.resources` en `docker-compose.yaml`.
+
+---
+
+## Volúmenes
+
+| Volumen        | Ruta en contenedor | Descripción                                      |
+| -------------- | ------------------ | ------------------------------------------------ |
+| `hf_cache`     | `/app/hf_cache`    | Caché de modelos de HuggingFace                  |
+| `uploads_data` | `/uploads`         | Archivos subidos por los usuarios                |
 
 ---
 
