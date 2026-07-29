@@ -53,8 +53,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.3'
-          memory: 800M
+          cpus: '0.5'
+          memory: 1G
     networks:
       - evd-network
   app.evd:
