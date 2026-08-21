@@ -50,7 +50,7 @@ services:
       - MAIL_FROM_NAME=${MAIL_FROM_NAME}
     volumes:
       - hf_cache:/app/hf_cache
-      - uploads_data:/uploads
+      - uploads_data:/app/uploads
     deploy:
       resources:
         limits:
