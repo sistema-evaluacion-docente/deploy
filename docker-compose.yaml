@@ -1,4 +1,20 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - evd-network
+
   nginx:
     image: nginx:alpine
     ports:
@@ -51,10 +67,13 @@ services:
     volumes:
       - hf_cache:/app/hf_cache
       - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 1G
     networks:
       - evd-network
@@ -78,6 +97,7 @@ services:
       - api.evd
 
 volumes:
+  postgres_data:
   hf_cache:
   uploads_data:
 
